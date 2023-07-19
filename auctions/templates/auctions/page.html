@@ -1,0 +1,188 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+        {% if watchlist == True %}
+            <button type="button" id="delete" onclick="Delete()" class="btn btn-danger">Delete from watchlist</button>
+        {% else %}
+            <button type="button" id="add" onclick="Add()" class="btn btn-success">Add to watchlist</button>
+        {% endif %}
+    {% endif %}
+    <div style="display: grid; grid-template-columns: 40% 5% 40%;">
+        <div>
+            <h1 style="text-align: center;"><b>{{list.name}}</b></h1><br>
+            <div style="height:370px; width: 384px; display: block; margin-left: auto; margin-right: auto"><img id="presentation" src="{{ list.photo }}"><br></div>
+        </div>
+        <div></div>
+        <div>
+            <br><br><br>
+            <h3><p id="description4">{{list.descripte_me}}</p></h3><br>
+        </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 40% 5% 40%;">
+        <div>
+            <h2 class="description2">Listed by: {{ list.owner }}</h2>
+            <h2 class="description2">Category: {{ list.category.name }}</h2>
+        </div>
+        <div></div>
+        <div>
+            {% if user.is_authenticated %}
+            <h2>Current bid: <span id="cost"></span></h2>
+            {% if owner != True %}
+            <h2><span id="owner"></span></h2>
+            {% endif %}
+        {% endif %}
+        {% if list.bidden.first.activity == True %}
+            {% if user.is_authenticated %}
+                {% if owner == True %}
+                    <div style="display: grid; width: 240px; grid-template-columns: 50% 50%;">
+                        <div>
+                            <button type="button" onclick="End()" id="ending" class="btn btn-danger">End bidding</button>
+                        </div>
+                        <div>
+                            <form action="{% url 'Pdelete' %}" id="for_owner" method="post">
+                                {% csrf_token %}
+                                <button type="submit" value="{{ list.id }}" name="number" class="btn btn-warning">Delete listing</button>
+                            </form>
+                        </div>
+                    </div> 
+                {% else %} 
+                <div style="width: 440px; display: grid; grid-template-columns: 49% 2% 49%;" id="bidos" class="input-group mb-3">
+                    <div>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">$</span>
+                            <input type="number" id="Bid" class="form-control" aria-label="Amount (to the nearest dollar)">
+                        </div>
+                    </div>
+                    <div></div>
+                    <div><button type="button" id="button" onclick="Bid()" class="btn btn-primary">Place bid</button></div>
+                    
+                </div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <h3 style="color: #016666">Bidding was ended</h3><br>
+        {% endif %}
+        </div>
+    </div>
+    <br><br><br>
+    <h3 style="color: #c8c8c8; text-align: center;">Comments 👇</h3>
+    {% if user.is_authenticated %}
+        <div style="width:680px; display: block; margin-left: auto; margin-right: auto;">
+            <textarea class="form-control" id="exampleFormControlTextarea1" placeholder="Your comment" rows="3"></textarea>
+            <button type="button" style="display: block; margin-left: auto;" onclick="Comment()" class="btn btn-info btn-lg">Send</button>
+        </div><br>
+    {% endif %}
+    <div id="comments">
+    {% for x in comments %}
+        <div style="width:680px; background-color: #f1f1f1; display: block; margin-left: auto; margin-right: auto;">
+            <h6 style="text-align:right;">{{ x.name.username }} has posted {{ x.date }}</h6>
+            <h3 style="color: #9e7777"><p style="white-space: pre-line;">{{ x.content }}</p></h3>
+        </div>
+    {% endfor %}
+    </div>
+    <script>
+        function Bid()
+            {
+                $.ajax({
+                        url : '/bid',
+                        data : {
+                                page : "{{ list.id }}",
+                                bid: $("#Bid").val()
+                            },
+                        type : 'GET',       
+                        }).done(function(responce){
+                            if (responce["answer"] == false) 
+                            {
+                                alert("Wrong bid!!!");
+                            }
+                            $("#Bid").replaceWith('<input type="number" id="Bid" class="form-control" aria-label="Amount (to the nearest dollar)">')
+                            Check()
+                        });
+            }
+        function Check()
+            {
+                $.ajax({
+                        url : '/check',
+                        data : {
+                                page : "{{ list.id }}"
+                            },
+                        type : 'GET',       
+                        }).done(function(request){
+                            $("#cost").replaceWith("<span id='cost'>$" + request["cost"] + ".0</span>")
+                            $("#owner").replaceWith("<span id='owner'>Your bid is" + request["owner"] + "the current bid!</span>")
+                            if (request["winner"] != "")
+                            {
+                                $("#owner").replaceWith("<span id='owner'>" + request["winner"] + "'s bid won! </span>")
+                                $("#bidos").replaceWith('<h3 style="color: #016666">Bidding was ended</h3>')
+                                clearTimeout(timerId);
+                            }
+                        });
+            }
+        function End()
+            {
+                $.ajax({
+                        url : '/end',
+                        data : {
+                                page : "{{ list.id }}"
+                            },
+                        type : 'GET',     
+                        }).done(function(){
+                            $("#ending").replaceWith('Bidding was ended')   
+                            $("#for_owner").replaceWith("")
+                        });
+            }
+        function Add()
+            {
+                $.ajax({
+                        url : '/Wadd',
+                        data : {
+                                page : "{{ list.id }}"
+                            },
+                        type : 'GET',        
+                        }).done(function(){
+                            $("#add").replaceWith('<button type="button" id="delete" onclick="Delete()" class="btn btn-danger">Delete from watchlist</button>')
+                        });
+            }
+        function Delete()
+            {
+                $.ajax({
+                        url : '/Wdel',
+                        data : {
+                                page : "{{ list.id }}"
+                            },
+                        type : 'GET'
+                        }).done(function(){
+                            $("#delete").replaceWith('<button type="button" id="add" onclick="Add()" class="btn btn-success">Add to watchlist</button>')
+                        });   
+            }
+        function Comment()
+            {
+                if ($("#exampleFormControlTextarea1").val() != "")
+                {
+                $.ajax({
+                        url : '/open/comment',
+                        data : {
+                                page : "{{ list.id }}",
+                                comment: $("#exampleFormControlTextarea1").val()
+                            },
+                        type : 'GET',       
+                        }).done(function(){                            
+                            $("#exampleFormControlTextarea1").replaceWith('<textarea class="form-control" id="exampleFormControlTextarea1" placeholder="Your comment" rows="3"></textarea>');
+                            $("#comments").load(location.href+" #comments>*","");
+                        });
+            }
+            }
+        $(document).ready(function()
+        {
+            Check()
+        });
+        let timerId = setTimeout(function tick() {
+            Check()
+            timerId = setTimeout(tick, 2000); // (*)
+            }, 2000);
+        setInterval(function() {
+        $("#comments").load(location.href+" #comments>*","");
+    }, 5000);
+    </script>
+{% endblock %}

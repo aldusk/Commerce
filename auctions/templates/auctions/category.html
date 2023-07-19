@@ -1,0 +1,15 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+{% if categories %}
+    <div id="categories">
+        <ul>
+            {% for x in categories %}
+                <li><a href="category/{{x.name}}"><h2 id="categories">{{x.name}}</h2></a></li>
+            {% endfor %}
+        </ul>
+    </div>
+{% else %}
+    There is nothing yet, but we are sure that something will appear soon.
+{% endif %}
+{% endblock %}

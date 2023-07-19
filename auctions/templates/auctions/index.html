@@ -1,0 +1,97 @@
+{% extends "auctions/layout.html" %}
+{% load templatetag %}
+
+{% block body %}
+    {% if comenting %}
+        <h1>{{ comenting }}</h1>
+    {% endif %}
+    <h3 style="color: #393185;">Active Listings</h3>
+    {% if list %}
+        <div class="container">
+            {% for x in list %}
+                <div>
+                    {% if user.is_authenticated %}
+                        <input  class="what_am_i" style="display: none;" id="{{ x.id }}">
+                    {% endif %}
+                    <div style="height:240px; width: 524px;"><a href="{% url 'open' x.id %}"><img id="presentation" src="{{ x.photo }}"></a></div>
+                    <h3><b><a href="{% url 'open' x.id %}" style="text-decoration: none; color: #333;">{{x.name}}</a></b></h3>
+                    <div id="description"><p style="white-space: pre-line">{{x.descripte_me}}</p></div>
+                    <div style="display: grid; grid-template-columns: 50% 50%;">
+                        <div>
+                            <h4 id="price">{{ x.bidden.first.money }} $</h4>
+                        </div>
+                        <div>
+                        <a href="{% url 'open' x.id %}"><img id="by" src="/static/auctions/cart.png"></a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h5 style="text-align:center;">There is nothing yet, but we are sure that something will appear soon.</h5>
+    {% endif %}
+    
+    {% if ended %}
+        <h3 style="color: #a93a0d;">Ended Listings</h3>
+
+        <div class="container">
+            {% for x in ended %}
+                <div>
+                    {% if user.is_authenticated %}
+                        <input  class="what_am_i" style="display: none;" id="{{ x.id }}">
+                    {% endif %}
+                    <div style="height:240px; width: 524px;"><a href="{% url 'open' x.id %}"><img id="presentation" src="{{ x.photo }}"></a></div>
+                    <h3><b><a href="{% url 'open' x.id %}" style="text-decoration: none; color: #333;">{{x.name}}</a></b></h3>
+                    <div id="description"><p style="white-space: pre-line">{{x.descripte_me}}</p></div>
+                    <div style="display: grid; grid-template-columns: 50% 50%;">
+                        <div>
+                            <h4 id="price">{{ x.bidden.first.money }} $</h4>
+                        </div>
+                        <div>
+                        <a href="{% url 'open' x.id %}"><img id="by" src="/static/auctions/cart.png"></a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <script>
+        let listes = document.querySelectorAll(".what_am_i")
+        for (let i = 0; i < listes.length; i++)
+        {
+            $.ajax({
+                    url : '/witch',
+                    data : {
+                            page : listes[i].id
+                            },
+                    type : 'GET',        
+                    }).done(function(response){
+                        $('#'+ listes[i].id).replaceWith(response)
+                    });
+        }
+        function Add(number)
+            {
+                $.ajax({
+                        url : '/Wadd',
+                        data : {
+                                page : number
+                            },
+                        type : 'GET',        
+                        }).done(function(){
+                            $("#"+number).replaceWith('<img src="/static/auctions/unbookmark.png" id="' + number + '" title="Delete from watchlist" onclick="Delete('+ number +')">')
+                        });
+            }
+        function Delete(number)
+            {
+                $.ajax({
+                        url : '/Wdel',
+                        data : {
+                                page : number
+                            },
+                        type : 'GET'
+                        }).done(function(){
+                            $("#"+number).replaceWith("<img src='/static/auctions/bookmark.png' id='" + number + "' title='Add to watchlist' onclick='Add(" + number + ")'>")
+                        });   
+            }
+    </script>
+{% endblock %}

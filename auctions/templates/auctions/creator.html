@@ -1,0 +1,157 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Create listening</h2> <button type="button" class="btn btn-info" onclick="stars()">Change view</button><br><br>
+    <div style="display: grid; grid-template-columns:69% 1% 29%;">
+        <div id="not_page" style="display: inline;">
+            <h3 style="text-align: center; color:#d23f22">Search view</h3>
+            <div class="container">
+                    <div style="margin: 0px;">
+                        <img src='/static/auctions/bookmark.png' title='Add to watchlist'>
+                        <div style="height:240px; width: 524px;"><img id="presentation" src="https://drm2ecjli5gr8.cloudfront.net/photofunny.net/efectos/grandes/polaroidWideFrame.jpg"></div>
+                        <b><h2 id="change_me21" style="color: #333; text-align: center;">Name of your listing</h2></b>
+                        <div id="description"><p id="change_me31" style="white-space: pre-line">Your description</p></div>
+                        <div style="display: grid; grid-template-columns: 50% 50%;">
+                            <div>
+                                <h4 id="price">Start price</h4>
+                            </div>
+                            <div>
+                            <img id="by" src="/static/auctions/cart.png">
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div id="page" style="display: none; ">
+            <h3 style="text-align: center; color:#d23f22">Opened view</h3>
+            <div style="border: 0.5px solid black; display: grid; grid-template-columns: 40% 58%;">
+                <div>
+                    <button type="button" class="btn btn-success">Add to watchlist</button>
+                    <b><h1 id="change_me22" style="text-align: center;">Name of your listing</h1></b><br>
+                    <img width="33%" id="presentation2" style="display: block; margin-left: auto; margin-right: auto;" src="https://drm2ecjli5gr8.cloudfront.net/photofunny.net/efectos/grandes/polaroidWideFrame.jpg"><br>
+                </div>
+                <div>
+                    <br><br><br>
+                    <h3 id="description4"><p id="change_me32" style="white-space: pre-line">Your description</p></h3><br>
+                </div>
+                <div>
+                    <h2 class="description2">Listed by: {{ name }}</h2>
+                </div>
+                <div>
+                    <h2>Current bid: $00.0</h2>
+                    <h2>Your bid is not the current bid!</h2>
+                    <div style="max-width:50%;" id="bidos" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">$</span>
+                        </div>
+                        <input type="number" id="Bid" class="form-control" aria-label="Amount (to the nearest dollar)">
+                        <button type="button" id="button" onclick="Bid()" class="btn btn-primary">Place bid</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div></div>
+        <div>
+            <br><br>
+            <form action="{% url 'creator' %}" method="POST" autocomplete="off">
+                {% csrf_token %}
+                <div style="width: 450px;"><input type="text" id="name" name="name" class="form-control" placeholder="Name of listening" aria-label="Name of listing" aria-describedby="basic-addon1" oninput="named()" required></div><br>
+                <div style="width: 450px;"><textarea class="form-control" id="exampleFormControlTextarea1" name="description" placeholder="Description of listing" oninput="descripte()" rows="8" required></textarea></div><br>
+                <div style="width: 450px;"><input type="url" id="photo" name="photo" placeholder="URL of listing photo" onchange="scream()" class="form-control" aria-label="URL of listening photo" aria-describedby="basic-addon1"></div><br>
+                <div style="width: 450px;"><input type="number" id="starting_price" name="starting_price" placeholder="starting price" oninput="prices()" class="form-control" aria-label="Amount (to the nearest dollar)" required></div><br>
+                <div style="width: 450px;"><input class="form-control" list="categories" name="category" type="text" id="category" placeholder="Choose category">
+                    <datalist id="categories"> 
+                        {% for x in categories %}
+                            <option>{{ x.name }}</option>
+                        {% endfor %}
+                    </datalist>
+                </div><br>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        </div>
+        </div>
+    <script>
+        function stars()
+        {
+            let page = document.querySelector('#page')
+            let not_page = document.querySelector('#not_page')
+            if (page.style.display == 'none')
+            {
+                not_page.style.display = 'none'
+                page.style.display = 'inline'
+            }
+            else
+            {
+                not_page.style.display = 'inline'
+                page.style.display = 'none'
+            }
+        }
+        function scream()
+        {
+            if (document.getElementById('photo').value != "")
+            {   
+                fetch(document.getElementById("photo").value)
+                .then(function (response) {
+                    if (response.status > 300)
+                    {
+                        alert("Wrong URL!")
+                        document.getElementById("photo").value = ""
+                    }
+                    else
+                    {   
+                        var myImage = new Image();
+                        myImage.src = document.getElementById("photo").value
+                        myImage.id = "presentation"
+                        document.getElementById("presentation").replaceWith(myImage)  
+                        var myImage2 = new Image();
+                        myImage2.src = document.getElementById("photo").value
+                        myImage2.id = "presentation2"
+                        document.getElementById("presentation2").replaceWith(myImage2)  
+                    }
+                })
+            }
+        }
+        function named()
+        {
+            let x = document.getElementById("name").value
+            if (x == "")
+            {
+                $("#change_me21").replaceWith('<h2 id="change_me21" style="color: #333; text-align: center;">Name of your listing</h2>')
+                $("#change_me22").replaceWith('<h1 id="change_me22" style="text-align: center;">Name of your listing</h1>')
+            }
+            else
+            {
+                $("#change_me21").replaceWith('<h2 id="change_me21" style="color: #333; text-align: center;">' + x + '</h2>')
+                $("#change_me22").replaceWith('<h1 id="change_me22" style="text-align: center;">'+ x + '</h1>')
+            }
+            
+        }
+        function descripte()
+        {
+            let x = document.getElementById("exampleFormControlTextarea1").value
+            if (x == "")
+            {
+                $("#change_me31").replaceWith('<p id="change_me31" style="white-space: pre-line">Your description</p>')
+                $("#change_me32").replaceWith('<p id="change_me32" style="white-space: pre-line">Your description</p>')
+            }
+            else
+            {
+                $("#change_me31").replaceWith('<p id="change_me31" style="white-space: pre-line">' + x + '</p>')
+                $("#change_me32").replaceWith('<p id="change_me32" style="white-space: pre-line">' + x + '</p>') 
+            }  
+        }
+        function prices()
+        {
+            let x = document.getElementById("starting_price").value
+            if (x != "")
+            {
+                $("#price").replaceWith('<h4 id="price">' + x + '$</h4>')
+            }
+            else
+            {
+                $("#price").replaceWith('<h4 id="price">Start price</h4>')
+            }
+            
+        }
+    </script> 
+{% endblock %}
